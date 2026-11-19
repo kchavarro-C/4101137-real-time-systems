@@ -1,0 +1,56 @@
+/*
+ * ESP32-DevKitC (classic Xtensa LX6) pin map for the superloop.
+ * Only hardware description changes; the C does not.
+ *
+ * GPIOs chosen to avoid: strapping pins (0/2/5/12/15), UART0 console (1/3),
+ * SPI flash (6-11), input-only pins (34-39).
+ *
+ * Instrumentation pins are on a consecutive run so an 8-channel
+ * analyzer ribbon clips on in one move.
+ *
+ * | Task        | GPIO |
+ * |-------------|------|
+ * | sampling    |  18  |
+ * | control     |  19  |
+ * | console     |  21  |
+ * | telemetry   |  22  |
+ * | flow batch  |  23  |
+ * | display     |  25  |
+ * | valve (led0)|  26  |
+ * | flow pulse  |  27  |
+ */
+
+#include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/i2c/i2c.h>
+
+/ {
+	aliases {
+		led0 = &valve_out;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		valve_out: valve_out { gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>; };
+	};
+
+	instr {
+		compatible = "gpio-leds";
+		instr_samp: instr_samp { gpios = <&gpio0 18 GPIO_ACTIVE_HIGH>; };
+		instr_ctrl: instr_ctrl { gpios = <&gpio0 19 GPIO_ACTIVE_HIGH>; };
+		instr_cons: instr_cons { gpios = <&gpio0 21 GPIO_ACTIVE_HIGH>; };
+		instr_tele: instr_tele { gpios = <&gpio0 22 GPIO_ACTIVE_HIGH>; };
+		instr_flow: instr_flow { gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>; };
+		instr_disp: instr_disp { gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>; };
+	};
+
+	keys {
+		compatible = "gpio-keys";
+		flow_pulse: flow_pulse {
+			gpios = <&gpio0 27 (GPIO_ACTIVE_HIGH | GPIO_PULL_DOWN)>;
+		};
+	};
+};
+
+/* Optional SSD1306 HMI (build with -DEXTRA_CONF_FILE=display.conf).
+ * i2c0 on ESP32 classic: SDA GPIO21 / SCL GPIO22 — but those are used for
+ * instr_cons/tele above, so use i2c1 on SDA GPIO13 / SCL GPIO16 instead. */
