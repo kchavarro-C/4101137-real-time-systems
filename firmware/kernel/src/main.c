@@ -39,7 +39,7 @@
 #define PWM_STEPS        20    /* software PWM on the valve LED: 1 kHz / 20 = 50 Hz */
 #define FLOW_BATCH       100   /* pulses accumulated before the batch math runs */
 #define ESTOP_MV         3000  /* overpressure threshold */
-#define CALIB_ROUNDS     1000  /* `calib` command: rounds of read + settle */
+#define CALIB_ROUNDS     5000  /* `calib` command: rounds of read + settle */
 #define DISPLAY_MS       500   /* HMI refresh period */
 #define ESTOP_HOLD       50    /* joystick-down samples (at 50 Hz) = 1 s hold */
 
@@ -300,6 +300,7 @@ static void task_control(void)
 		duty_pct = CLAMP((error + integral_mv) / 20, 0, 100);
 	}
 
+	k_busy_wait(10);
 	instr_set(&instr_ctrl, 0);
 }
 
